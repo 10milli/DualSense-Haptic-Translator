@@ -1,6 +1,6 @@
 # DualSense Haptic Translator
 
-**Version 1.2 is the latest stable release.**
+**Version 1.2.1 is the latest stable release.**
 
 DualSense Haptic Translator converts Forza Horizon and Forza Motorsport UDP telemetry into DualSense haptic audio, adaptive trigger feedback, and configurable HUD overlays on Windows.
 
@@ -28,6 +28,19 @@ DualSense Haptic Translator converts Forza Horizon and Forza Motorsport UDP tele
   visibility, and Sound To Haptic.
 - English and Spanish main UI, with Korean, Chinese, and Spanish effect descriptions.
 
+## What's New In Version 1.2.1
+
+- Fixed a runtime dependency problem that could let the main app open while
+  preventing the DualSense output service from starting on PCs without a
+  compatible .NET 8 Desktop Runtime.
+- The DualSense output server and Sound To Haptic bridge are now bundled as
+  Windows x64 self-contained executables. Normal users no longer need to
+  install a separate .NET runtime.
+- Haptic, trigger, HUD, telemetry, preset, and shortcut behavior is unchanged
+  from Version 1.2. Existing settings remain compatible.
+- The download is larger because it contains the required .NET runtime
+  components. The first helper start can also take slightly longer.
+
 ## What's New In Version 1.2
 
 - Horizon HUD Standby Hide now remains hidden through menus, loading, and
@@ -52,6 +65,7 @@ DualSense Haptic Translator converts Forza Horizon and Forza Motorsport UDP tele
 - A wired USB connection to the DualSense controller is recommended.
 - Forza Horizon or Forza Motorsport with Data Out enabled.
 - Extract the release ZIP before running the application.
+- No separate .NET runtime installation is required for the prebuilt release.
 
 ## Quick Start
 
@@ -85,12 +99,13 @@ Xbox App, Microsoft Store, or Game Pass versions may require a Windows AppContai
 - **Sound To Haptic** requires a compatible Windows audio source and output setup.
 - DS4Windows, Steam Input, reWASD, or other controller tools can conflict with device access or trigger output depending on their configuration.
 
-## Upgrading From 1.11, 1.1, 1.0, Or 0.9.x
+## Upgrading From 1.2, 1.11, 1.1, 1.0, Or 0.9.x
 
-Version 1.11, Version 1.1, Version 1.0, and compatible `0.92` settings using
-snapshot format `1` are preserved. On the next settings save or normal exit,
-the app creates a backup and records version `1.2`. Unsaved haptic and trigger
-preset experiments are not committed by that automatic preference save.
+Version 1.2, Version 1.11, Version 1.1, Version 1.0, and compatible `0.92`
+settings using snapshot format `1` are preserved. On the next settings save or
+normal exit, the app creates a backup and records version `1.2.1`. Unsaved
+haptic and trigger preset experiments are not committed by that automatic
+preference save.
 Version 1.0 HUD layout values are migrated once if needed to preserve their
 physical size and screen position. Older RPM settings without a style field
 continue to use Classic.

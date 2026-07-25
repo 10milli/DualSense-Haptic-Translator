@@ -1,0 +1,32 @@
+DualSense Haptic Translator 1.2.1 - Emergency Patch
+===================================================
+
+RUNTIME DEPENDENCY FIX
+
+- The DualSense output server is now published as a Windows x64
+  self-contained single-file executable.
+- The Sound To Haptic bridge is also published as a Windows x64
+  self-contained single-file executable.
+- A separate .NET 8 Desktop Runtime installation is no longer required on the
+  user's PC.
+- This fixes the reported state where the main app opened but the output
+  server could not start, making a connected DualSense appear unavailable.
+
+UNCHANGED BEHAVIOR
+
+- Haptic, adaptive-trigger, HUD, telemetry, presets and shortcut behavior are
+  unchanged from version 1.2.
+- Existing format-1 settings and presets remain compatible.
+- Forza Data Out continues to use UDP port 8800 by default.
+- DSX remains optional and is configured separately.
+
+PACKAGE VERIFICATION
+
+- Both .NET helper executables are built with:
+  `win-x64 --self-contained true`.
+- Framework-dependent `.runtimeconfig.json`, `.deps.json` and helper DLL
+  sidecars are not included in the public package.
+- The build gate launches both helpers with deliberately invalid
+  `DOTNET_ROOT` values and requires exit code 0.
+- Developer documents, source, caches, logs and personal settings remain
+  excluded by the public allowlist.

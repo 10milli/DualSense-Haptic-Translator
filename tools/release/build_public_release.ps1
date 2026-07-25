@@ -19,12 +19,15 @@ $inlineDescriptionsVerifier = Join-Path $PSScriptRoot "verify_inline_description
 $gamepadShortcutsVerifier = Join-Path $PSScriptRoot "verify_gamepad_shortcuts.py"
 $hudUiScaleVerifier = Join-Path $PSScriptRoot "verify_hud_ui_scale_independence.py"
 $hapticEqBoostVerifier = Join-Path $PSScriptRoot "verify_haptic_eq_boost.py"
+$selfContainedDotnetVerifier = Join-Path $PSScriptRoot "verify_self_contained_dotnet.py"
 $artifactsRoot = Join-Path $projectRoot "artifacts"
 $assetRoot = Join-Path $artifactsRoot "public_assets"
 $buildRoot = Join-Path $artifactsRoot "public_build"
 $distRoot = Join-Path $artifactsRoot "public_release"
 $specRoot = Join-Path $artifactsRoot "public_spec"
-$outputPublishRoot = Join-Path $artifactsRoot "output_runtime"
+$dotnetPublishRoot = Join-Path $artifactsRoot "public_dotnet"
+$outputPublishRoot = Join-Path $dotnetPublishRoot "output_server"
+$soundPublishRoot = Join-Path $dotnetPublishRoot "sound_bridge"
 $releaseRoot = Join-Path $distRoot $appName
 
 $pythonExecutable = $null
@@ -128,6 +131,14 @@ if (-not $appVersionMatch.Success) {
     throw "Could not read APP_VERSION from $appVersionSource"
 }
 $releaseVersion = $appVersionMatch.Groups[1].Value
+if ($releaseVersion -notmatch '^\d+\.\d+(\.\d+)?$') {
+    throw "APP_VERSION must contain two or three numeric components: $releaseVersion"
+}
+$versionComponents = @($releaseVersion.Split('.') | ForEach-Object { [int]$_ })
+while ($versionComponents.Count -lt 4) {
+    $versionComponents += 0
+}
+$expectedFileVersion = ($versionComponents -join '.')
 $releaseNotesFileName = "RELEASE_NOTES_$releaseVersion.txt"
 $releaseNotesSource = Join-Path $PSScriptRoot $releaseNotesFileName
 $archivePath = Join-Path $distRoot "$appName $releaseVersion.zip"
@@ -145,6 +156,7 @@ Assert-FileExists $inlineDescriptionsVerifier
 Assert-FileExists $gamepadShortcutsVerifier
 Assert-FileExists $hudUiScaleVerifier
 Assert-FileExists $hapticEqBoostVerifier
+Assert-FileExists $selfContainedDotnetVerifier
 $allowlist = Get-Content -LiteralPath $allowlistPath -Raw | ConvertFrom-Json
 
 if ($allowlist.release_root_files -notcontains $releaseNotesFileName) {
@@ -174,19 +186,48 @@ Reset-GeneratedDirectory $assetRoot
 Reset-GeneratedDirectory $buildRoot
 Reset-GeneratedDirectory $distRoot
 Reset-GeneratedDirectory $specRoot
-Reset-GeneratedDirectory $outputPublishRoot
+Reset-GeneratedDirectory $dotnetPublishRoot
 
 $outputProject = Join-Path $projectRoot "dht_app\dualsense_output_server\DualSenseOutputServer.csproj"
 $soundProject = Join-Path $projectRoot "dht_app\sound_to_haptic_bridge\DualSenseSoundToHapticBridge.csproj"
 Assert-FileExists $outputProject
 Assert-FileExists $soundProject
-& dotnet publish $outputProject -c Release --nologo --self-contained false -o $outputPublishRoot
+& dotnet publish $outputProject -c Release -r win-x64 --self-contained true `
+    -p:PublishSingleFile=true `
+    -p:IncludeNativeLibrariesForSelfExtract=true `
+    -p:EnableCompressionInSingleFile=true `
+    -p:DebugType=None `
+    -p:DebugSymbols=false `
+    --nologo `
+    -o $outputPublishRoot
 if ($LASTEXITCODE -ne 0) {
     throw "DualSense output service publish failed with exit code $LASTEXITCODE."
 }
-& dotnet build $soundProject -c Release --nologo
+& dotnet publish $soundProject -c Release -r win-x64 --self-contained true `
+    -p:PublishSingleFile=true `
+    -p:IncludeNativeLibrariesForSelfExtract=true `
+    -p:EnableCompressionInSingleFile=true `
+    -p:DebugType=None `
+    -p:DebugSymbols=false `
+    --nologo `
+    -o $soundPublishRoot
 if ($LASTEXITCODE -ne 0) {
-    throw "Sound To Haptic bridge build failed with exit code $LASTEXITCODE."
+    throw "Sound To Haptic bridge publish failed with exit code $LASTEXITCODE."
+}
+
+Assert-ExactRelativeFiles $outputPublishRoot $allowlist.output_runtime
+Assert-ExactRelativeFiles $soundPublishRoot $allowlist.sound_bridge
+$selfContainedVerifierArguments = @($pythonPrefixArguments) + @(
+    '-B',
+    $selfContainedDotnetVerifier,
+    '--output-server',
+    (Join-Path $outputPublishRoot "DualSenseOutputServer.exe"),
+    '--sound-bridge',
+    (Join-Path $soundPublishRoot "DualSenseSoundToHapticBridge.exe")
+)
+& $pythonExecutable @selfContainedVerifierArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "Self-contained .NET verification failed with exit code $LASTEXITCODE."
 }
 
 $assetAppRoot = Join-Path $assetRoot "dht_app"
@@ -198,7 +239,7 @@ $soundDestination = Join-Path $assetAppRoot "sound_to_haptic_bridge\bin\Release\
 Copy-AllowlistedFiles (Join-Path $projectRoot "dht_app\Resource") $resourceDestination $allowlist.resources
 Copy-AllowlistedFiles (Join-Path $projectRoot "dht_app\config_presets") $presetDestination $allowlist.presets
 Copy-AllowlistedFiles $outputPublishRoot $runtimeDestination $allowlist.output_runtime
-Copy-AllowlistedFiles (Join-Path $projectRoot "dht_app\sound_to_haptic_bridge\bin\Release\net8.0-windows") $soundDestination $allowlist.sound_bridge
+Copy-AllowlistedFiles $soundPublishRoot $soundDestination $allowlist.sound_bridge
 Set-Content -LiteralPath (Join-Path $assetAppRoot "PUBLIC_RELEASE") -Value "Public release package: developer modes disabled." -Encoding ascii
 
 Assert-ExactRelativeFiles $resourceDestination $allowlist.resources
@@ -238,7 +279,6 @@ Copy-Item -LiteralPath $readmeSource -Destination (Join-Path $releaseRoot "READM
 Copy-Item -LiteralPath $releaseNotesSource -Destination (Join-Path $releaseRoot $releaseNotesFileName) -Force
 
 $executableInfo = [System.Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $releaseRoot "$appName.exe"))
-$expectedFileVersion = "$releaseVersion.0.0"
 if ($executableInfo.FileVersion -ne $expectedFileVersion -or $executableInfo.ProductVersion -ne $releaseVersion) {
     throw "Executable version metadata is incorrect: file=$($executableInfo.FileVersion), product=$($executableInfo.ProductVersion)"
 }

@@ -1,4 +1,4 @@
-# Building DualSense Haptic Translator 1.1
+# Building DualSense Haptic Translator 1.2.1
 
 Normal users should download the prebuilt ZIP from the GitHub Releases page. These instructions are for source review and reproducible public builds.
 
@@ -7,6 +7,9 @@ Normal users should download the prebuilt ZIP from the GitHub Releases page. The
 - Windows 10 or Windows 11, 64-bit
 - Python 3.10
 - .NET 8 SDK or a newer SDK capable of building `net8.0-windows`
+
+The .NET SDK is required only when building from source. Users of the prebuilt
+release do not need to install a separate .NET runtime.
 
 Install the Python dependencies from the repository root:
 
@@ -33,9 +36,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\release\build_public_r
 The script:
 
 1. Runs the first-run, RPM HUD, release-default, haptic, trigger, inline-description, HUD-scale migration, and EQ Boost verification gates.
-2. Publishes the DualSense output service and builds the Sound To Haptic bridge.
+2. Publishes both .NET helpers as Windows x64 self-contained single-file
+   executables.
 3. Packages the PySide6 application with PyInstaller.
 4. Audits the release folder against the public allowlist.
 5. Produces both a one-folder build and a distribution ZIP under `artifacts\public_release`.
 
 The public package excludes source files, developer launchers, internal documents, logs, caches, and personal settings.
+The self-contained helpers make the release larger, but prevent the output
+service from depending on a separately installed .NET Desktop Runtime.

@@ -25,35 +25,15 @@
     "motorsport/user_2.json"
   ],
   "output_runtime": [
-    "DualSenseOutputServer.deps.json",
-    "DualSenseOutputServer.dll",
-    "DualSenseOutputServer.exe",
-    "DualSenseOutputServer.runtimeconfig.json",
-    "NAudio.Asio.dll",
-    "NAudio.Core.dll",
-    "NAudio.dll",
-    "NAudio.Midi.dll",
-    "NAudio.Wasapi.dll",
-    "NAudio.WinForms.dll",
-    "NAudio.WinMM.dll"
+    "DualSenseOutputServer.exe"
   ],
   "sound_bridge": [
-    "DualSenseSoundToHapticBridge.deps.json",
-    "DualSenseSoundToHapticBridge.dll",
-    "DualSenseSoundToHapticBridge.exe",
-    "DualSenseSoundToHapticBridge.runtimeconfig.json",
-    "NAudio.Asio.dll",
-    "NAudio.Core.dll",
-    "NAudio.dll",
-    "NAudio.Midi.dll",
-    "NAudio.Wasapi.dll",
-    "NAudio.WinForms.dll",
-    "NAudio.WinMM.dll"
+    "DualSenseSoundToHapticBridge.exe"
   ],
   "release_root_files": [
     "DualSense Haptic Translator.exe",
     "README_FIRST.txt",
-    "RELEASE_NOTES_1.2.txt"
+    "RELEASE_NOTES_1.2.1.txt"
   ],
   "release_root_directories": [
     "_internal"

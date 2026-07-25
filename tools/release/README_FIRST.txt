@@ -1,4 +1,4 @@
-DualSense Haptic Translator 1.2
+DualSense Haptic Translator 1.2.1
 ================================
 
 QUICK START
@@ -12,6 +12,14 @@ QUICK START
 
 The UDP port can be changed by clicking the port number at the bottom of the
 app. The value in Forza and the app must match.
+
+.NET RUNTIME
+
+- Version 1.2.1 includes self-contained x64 builds of the DualSense output
+  server and Sound To Haptic bridge.
+- Users do not need to install the .NET 8 Desktop Runtime separately.
+- This specifically fixes DualSense detection/output startup failures on
+  systems where Microsoft.WindowsDesktop.App 8 was not installed.
 
 OPTIONAL FEATURES
 
