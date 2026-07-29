@@ -2666,5 +2666,6 @@ def _short_haptic_name(name: str) -> str:
         "Road Bumps": "Road Bumps",
         "Impacts": "Impacts",
         "Impact - Side": "Impact Side",
+        "Impact - Smashable": "Impact - Smashable",
     }
     return names.get(name, name)
