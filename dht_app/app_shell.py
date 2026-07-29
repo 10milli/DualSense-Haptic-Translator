@@ -2034,6 +2034,7 @@ class MainWindow(QMainWindow):
             "Road Bumps",
             "Impacts",
             "Impact - Side",
+            "Impact - Smashable",
         ]
         advanced = [
             "Bump Sensitivity",
