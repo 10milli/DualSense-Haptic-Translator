@@ -297,7 +297,7 @@ TRIGGER_DETAIL_GROUPS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
         ("Pedal Range", ("start_percent", "max_percent", "force_percent")),
     ),
     "Brake Resistance": (
-        ("Resistance", ("force_percent", "start_percent")),
+        ("Resistance", ("force_percent", "start_percent", "max_percent")),
         ("Slip Release", ("slip_threshold", "slip_drop_low_percent")),
         ("Slip Pulse Window", ("slip_pulse_start_percent", "slip_pulse_end_percent")),
         ("Soft Pulse", ("slip_soft_pulse_amplitude", "slip_soft_pulse_frequency", "slip_soft_pulse_start_zone")),
@@ -366,7 +366,7 @@ TRIGGER_DETAIL_RANGES: dict[str, dict[str, tuple[int, int]]] = {
         "rpm_rev_limit": (0, 10),
     },
     "Brake Resistance - Predictive": {
-        "start_percent": (40, 100),
+        "start_percent": (0, 100),
         "max_percent": (30, 95),
         "wall_percent": (0, 40),
     },
